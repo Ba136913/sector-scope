@@ -3,8 +3,7 @@
 
 description = "Reverse-engineer and clone any website as a pixel-perfect replica"
 
-[prompt]
-text = '''
+prompt = """
 
 # Clone Website
 
@@ -470,4 +469,4 @@ When done, report:
 - Visual QA results (any remaining discrepancies)
 - Any known gaps or limitations
 
-'''
+"""

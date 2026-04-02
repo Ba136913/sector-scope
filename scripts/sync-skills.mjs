@@ -24,7 +24,7 @@ try {
   process.exit(1);
 }
 
-const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
 if (!match) {
   console.error('Error: Could not parse SKILL.md frontmatter');
   process.exit(1);
@@ -72,7 +72,7 @@ write(
   `# AUTO-GENERATED from .claude/skills/clone-website/SKILL.md\n` +
     `# Run \`node scripts/sync-skills.mjs\` to regenerate.\n\n` +
     `description = "${shortDesc}"\n\n` +
-    `[prompt]\ntext = '''\n${geminiBody}\n'''\n`
+    `prompt = """\n${geminiBody}\n"""\n`
 );
 
 // 6. OpenCode — markdown + YAML frontmatter, $ARGUMENTS works natively

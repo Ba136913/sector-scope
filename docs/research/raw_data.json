@@ -1,0 +1,183 @@
+{
+  "title": "TradeFinder | Find the best Trades available for Stocks and Indices",
+  "meta": [
+    {
+      "name": "",
+      "property": null,
+      "content": ""
+    },
+    {
+      "name": "viewport",
+      "property": null,
+      "content": "width=device-width, initial-scale=1"
+    },
+    {
+      "name": "robots",
+      "property": null,
+      "content": "index, follow"
+    },
+    {
+      "name": "description",
+      "property": null,
+      "content": "TradeFinder is an advanced live market scanner to find the best trading opportunity in intraday, swing, and scalping trading. Available for F&O stocks and Option buying for indices."
+    },
+    {
+      "name": "keywords",
+      "property": null,
+      "content": "Breakout Scanner,Intraday Screener"
+    },
+    {
+      "name": "",
+      "property": "og:title",
+      "content": "TradeFinder | Find the best Trades available for Stocks and Indices"
+    },
+    {
+      "name": "",
+      "property": "og:description",
+      "content": "TradeFinder is an advanced live market scanner to find the best trading opportunity in intraday, swing, and scalping trading. Available for F&O stocks and Option buying for indices."
+    },
+    {
+      "name": "",
+      "property": "og:url",
+      "content": "https://tradefinder.in"
+    },
+    {
+      "name": "",
+      "property": "og:site_name",
+      "content": "TradeFinder"
+    },
+    {
+      "name": "",
+      "property": "og:locale",
+      "content": "en_US"
+    },
+    {
+      "name": "",
+      "property": "og:image",
+      "content": "https://tradefinder.in/assets/images/homepage_graphics/black_bg.webp"
+    },
+    {
+      "name": "",
+      "property": "og:image:secure_url",
+      "content": "https://tradefinder.in/assets/images/homepage_graphics/black_bg.webp"
+    },
+    {
+      "name": "",
+      "property": "og:image:width",
+      "content": "1080"
+    },
+    {
+      "name": "",
+      "property": "og:image:height",
+      "content": "1080"
+    },
+    {
+      "name": "",
+      "property": "og:image:alt",
+      "content": "stock market"
+    },
+    {
+      "name": "",
+      "property": "og:image:type",
+      "content": "image/png"
+    },
+    {
+      "name": "",
+      "property": "og:type",
+      "content": "website"
+    },
+    {
+      "name": "twitter:card",
+      "property": null,
+      "content": "summary_large_image"
+    },
+    {
+      "name": "twitter:title",
+      "property": null,
+      "content": "TradeFinder | Find the best Trades available for Stocks and Indices"
+    },
+    {
+      "name": "twitter:description",
+      "property": null,
+      "content": "TradeFinder is an advanced live market scanner to find the best trading opportunity in intraday, swing, and scalping trading. Available for F&O stocks and Option buying for indices."
+    },
+    {
+      "name": "twitter:image",
+      "property": null,
+      "content": "https://tradefinder.in/assets/images/homepage_graphics/black_bg.webp"
+    }
+  ],
+  "fonts": [
+    "\"Times New Roman\"",
+    "Manrope, sans-serif",
+    "lato, ubuntu, helvetica, sans-serif"
+  ],
+  "colors": {
+    "--toastify-color-light": "#fff",
+    "--toastify-color-dark": "#121212",
+    "--toastify-color-info": "#3498db",
+    "--toastify-color-success": "#07bc0c",
+    "--toastify-color-warning": "#f1c40f",
+    "--toastify-color-error": "hsl(6, 78%, 57%)",
+    "--toastify-color-transparent": "rgba(255, 255, 255, .7)",
+    "--toastify-icon-color-info": "var(--toastify-color-info)",
+    "--toastify-icon-color-success": "var(--toastify-color-success)",
+    "--toastify-icon-color-warning": "var(--toastify-color-warning)",
+    "--toastify-icon-color-error": "var(--toastify-color-error)",
+    "--toastify-container-width": "fit-content",
+    "--toastify-toast-width": "320px",
+    "--toastify-toast-offset": "16px",
+    "--toastify-toast-top": "max(var(--toastify-toast-offset), env(safe-area-inset-top))",
+    "--toastify-toast-right": "max(var(--toastify-toast-offset), env(safe-area-inset-right))",
+    "--toastify-toast-left": "max(var(--toastify-toast-offset), env(safe-area-inset-left))",
+    "--toastify-toast-bottom": "max(var(--toastify-toast-offset), env(safe-area-inset-bottom))",
+    "--toastify-toast-background": "#fff",
+    "--toastify-toast-padding": "14px",
+    "--toastify-toast-min-height": "64px",
+    "--toastify-toast-max-height": "800px",
+    "--toastify-toast-bd-radius": "6px",
+    "--toastify-toast-shadow": "0px 4px 12px rgba(0, 0, 0, .1)",
+    "--toastify-font-family": "sans-serif",
+    "--toastify-z-index": "9999",
+    "--toastify-text-color-light": "#757575",
+    "--toastify-text-color-dark": "#fff",
+    "--toastify-text-color-info": "#fff",
+    "--toastify-text-color-success": "#fff",
+    "--toastify-text-color-warning": "#fff",
+    "--toastify-text-color-error": "#fff",
+    "--toastify-spinner-color": "#616161",
+    "--toastify-spinner-color-empty-area": "#e0e0e0",
+    "--toastify-color-progress-light": "linear-gradient(to right, #4cd964, #5ac8fa, #007aff, #34aadc, #5856d6, #ff2d55)",
+    "--toastify-color-progress-dark": "#bb86fc",
+    "--toastify-color-progress-info": "var(--toastify-color-info)",
+    "--toastify-color-progress-success": "var(--toastify-color-success)",
+    "--toastify-color-progress-warning": "var(--toastify-color-warning)",
+    "--toastify-color-progress-error": "var(--toastify-color-error)",
+    "--toastify-color-progress-bgo": ".2",
+    "--swiper-theme-color": "#007aff",
+    "--swiper-navigation-size": "44px",
+    "--angle": "90deg",
+    "--c1": "#84b1ff",
+    "--c2": "#a8e6ff33"
+  },
+  "images": [],
+  "videos": [],
+  "backgroundImages": [],
+  "favicons": [
+    {
+      "href": "https://tradefinder.in/favicon.ico",
+      "sizes": ""
+    }
+  ],
+  "sections": [
+    {
+      "index": 0,
+      "tagName": "DIV",
+      "id": "",
+      "className": "preload preload-container",
+      "height": 844,
+      "top": 0
+    }
+  ],
+  "svgCount": 0
+}

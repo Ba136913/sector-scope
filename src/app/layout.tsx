@@ -1,20 +1,45 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Instrument_Serif, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-suisse",
+  subsets: ["latin"],
+});
+
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-perfectly",
+  weight: "400",
   subsets: ["latin"],
 });
 
 const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+  variable: "--font-bitcount",
   subsets: ["latin"],
 });
 
 export const metadata: Metadata = {
-  title: "Website Clone",
-  description: "Pixel-perfect website clone",
+  title: "cto.new - Completely free AI code agent",
+  description: "cto.new is the world's first completely free AI code agent. Use the latest frontier models from Anthropic, OpenAI and more. No credit card or API keys required.",
+  openGraph: {
+    title: "cto.new - Completely free AI code agent",
+    description: "cto.new is the world's first completely free AI code agent. Use the latest frontier models from Anthropic, OpenAI and more. No credit card or API keys required.",
+    url: "https://cto.new",
+    siteName: "cto.new",
+    images: [
+      {
+        url: "https://framerusercontent.com/images/NC6i6vDeOQTWZis14FFWERyH7s.png",
+      },
+    ],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@ctodotnew",
+    title: "cto.new - Completely free AI code agent",
+    description: "cto.new is the world's first completely free AI code agent. Use the latest frontier models from Anthropic, OpenAI and more. No credit card or API keys required.",
+    images: ["https://framerusercontent.com/images/NC6i6vDeOQTWZis14FFWERyH7s.png"],
+  },
 };
 
 export default function RootLayout({
@@ -23,11 +48,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className="antialiased">
+      <body
+        className={`${inter.variable} ${instrumentSerif.variable} ${geistMono.variable} font-sans`}
+      >
+        {children}
+      </body>
     </html>
   );
 }
