@@ -26,20 +26,24 @@ async function handleGemini(prompt: string, history: any[], modelName: string) {
 }
 
 async function handlePollinationsFallback(prompt: string, model: string = "openai") {
-  const response = await fetch("https://text.pollinations.ai/", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      messages: [
-        { role: "system", content: systemInstructionText },
-        { role: "user", content: prompt }
-      ],
-      model: model,
-      seed: Math.floor(Math.random() * 1000000)
-    })
-  });
+  // Try POST first
+  try {
+    const response = await fetch("https://text.pollinations.ai/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [{ role: "system", content: systemInstructionText }, { role: "user", content: prompt }],
+        model: model,
+        seed: Math.floor(Math.random() * 1000000)
+      })
+    });
+    if (response.ok) return await response.text();
+  } catch (e) {}
 
-  if (!response.ok) throw new Error(`${model} failed`);
+  // Try GET fallback
+  const encodedPrompt = encodeURIComponent(prompt);
+  const response = await fetch(`https://text.pollinations.ai/${encodedPrompt}?model=${model}&system=${encodeURIComponent(systemInstructionText)}`);
+  if (!response.ok) throw new Error(`${model} totally failed`);
   return await response.text();
 }
 
@@ -59,19 +63,21 @@ export async function POST(req: Request) {
       }
     }
 
-    // 2. Try Pollinations POST (Unlimited Free Backup)
-    const backupModels = ["qwen-coder", "openai", "mistral"];
+    // 2. Try Pollinations (Free Unlimited Backup)
+    const backupModels = ["llama", "qwen", "mistral", "searchgpt"];
     for (const model of backupModels) {
       try {
-        console.log(`Emergency: Trying ${model}...`);
+        console.log(`Emergency: Trying Pollinations with ${model}...`);
         const code = await handlePollinationsFallback(prompt, model);
-        if (code) return new Response(code.replace(/```html/gi, '').replace(/```/g, '').trim());
-      } catch (e) {
-        console.error(`${model} backup failed.`);
+        if (code && code.length > 100) {
+           return new Response(code.replace(/```html/gi, '').replace(/```/g, '').trim());
+        }
+      } catch (e: any) {
+        console.error(`Pollinations ${model} failed:`, e.message);
       }
     }
 
-    throw new Error("All AI Engines are currently offline.");
+    throw new Error("Critical Failure: All AI Engines (Gemini & Pollinations) are currently unreachable. Please check your internet connection or GEMINI_API_KEY.");
 
   } catch (error: any) {
     console.error("Master Failure:", error.message);
