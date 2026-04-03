@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { SECTORS_LIST, STOCKS_BY_SECTOR } from "@/lib/market-data";
+import { SECTORS_LIST, STOCKS_BY_SECTOR, getSectorData } from "@/lib/market-data";
 import { 
   LayoutGrid, List, ArrowUpCircle, ArrowDownCircle, 
   ExternalLink, ChevronRight, BarChart3, TrendingUp, 
@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type SourceType = 'yahoo' | 'google' | 'moneyControl' | 'combined';
+type SourceType = 'yahoo' | 'google' | 'moneyControl' | 'nse' | 'combined';
 
 export default function SectorScope() {
   const [trinityData, setTrinityData] = useState<any>(null);
@@ -20,30 +20,42 @@ export default function SectorScope() {
   const [searchQuery, setSearchQuery] = useState("");
   const [refreshTimer, setRefreshTimer] = useState(0);
 
-  const fetchTrinityData = useCallback(async () => {
+  const handleStockClick = (symbol: string) => {
+    if (typeof window !== 'undefined') {
+      window.open(`https://www.tradingview.com/chart/?symbol=NSE:${symbol}`, '_blank');
+    }
+  };
+
+  const fetchOmniData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/market', { cache: 'no-store' });
       const response = await res.json();
       
-      // CRITICAL FIX: Direct structure validation
+      // CRITICAL: Always use Vault Data
       if (response.data && response.data.yahoo) {
         setTrinityData(response.data);
         setLastUpdated(new Date(response.meta.timestamp).toLocaleTimeString('en-IN', { hour12: true }));
         setRefreshTimer(Math.floor(response.meta.refreshIn / 1000));
+      } else {
+        // Emergency Fallback to high-precision snapshot
+        const fallback = getSectorData();
+        const mappedFallback: any = {};
+        fallback.forEach(sec => sec.stocks.forEach(st => mappedFallback[st.symbol] = { price: st.price, chgPct: st.chgPct }));
+        setTrinityData({ yahoo: mappedFallback, combined: mappedFallback });
       }
     } catch (e) {
-      console.error("Trinity Engine Sync Error", e);
+      console.error("Omni Sync Failed - Knowledge Persistence Engaged", e);
     } finally {
       setLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchTrinityData();
-    const interval = setInterval(fetchTrinityData, 120000); 
+    fetchOmniData();
+    const interval = setInterval(fetchOmniData, 60000); // Check server-vault every 1 min
     return () => clearInterval(interval);
-  }, [fetchTrinityData]);
+  }, [fetchOmniData]);
 
   useEffect(() => {
     if (refreshTimer > 0) {
@@ -64,7 +76,7 @@ export default function SectorScope() {
           symbol: s,
           price: live.price || 0,
           chgPct: live.chgPct || 0,
-          rFac: (Math.abs(live.chgPct || 0) * 1.1).toFixed(2) + "x",
+          rFac: (Math.abs(live.chgPct || 0) * 1.15).toFixed(2) + "x",
           sign: (live.chgPct || 0) >= 0 ? 'bullish' : 'bearish'
         };
       });
@@ -80,7 +92,7 @@ export default function SectorScope() {
         upCount,
         downCount,
         totalCount: symbols.length,
-        multiplier: (Math.abs(avgChg) * 3.5).toFixed(2) + "x",
+        multiplier: (Math.abs(avgChg) * 3.8).toFixed(2) + "x",
         stocks
       };
     });
@@ -91,49 +103,27 @@ export default function SectorScope() {
     return processedSectors.find(s => s.id === selectedSector.id);
   }, [processedSectors, selectedSector]);
 
-  const tickerStocks = useMemo(() => {
-    if (!trinityData || !trinityData.yahoo) return [];
-    return Object.entries(trinityData.yahoo)
-      .map(([symbol, data]: any) => ({ symbol, ...data }))
-      .sort((a, b) => b.chgPct - a.chgPct)
-      .slice(0, 15);
-  }, [trinityData]);
-
-  const handleStockClick = (symbol: string) => {
-    window.open(`https://www.tradingview.com/chart/?symbol=NSE:${symbol}`, '_blank');
-  };
-
   const filteredSectors = processedSectors.filter(s => 
     s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     s.stocks.some(st => st.symbol.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
-  // LOADING GUARD
-  if (loading && !trinityData) {
-    return (
-        <div className="min-h-screen bg-[#000] flex flex-col items-center justify-center gap-6">
-            <Loader2 size={48} className="text-blue-500 animate-spin" />
-            <p className="text-slate-500 font-black uppercase tracking-[0.5em] text-xs">Synchronizing Neural Nodes...</p>
-        </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-[#020203] text-[#F1F5F9] font-sans selection:bg-blue-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#010102] text-[#F1F5F9] font-sans selection:bg-blue-500/30 overflow-x-hidden">
       
       {/* SOURCE SELECTOR */}
-      <div className="bg-[#0A0A0F] border-b border-white/5 sticky top-0 z-[200] backdrop-blur-xl">
+      <div className="bg-[#08090D] border-b border-white/5 sticky top-0 z-[200] backdrop-blur-md">
         <div className="max-w-[1600px] mx-auto px-6 h-10 flex items-center justify-between">
             <div className="flex items-center gap-6">
-                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Market Node:</span>
+                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Omni Node:</span>
                 <div className="flex gap-2">
-                    {(['yahoo', 'google', 'moneyControl', 'combined'] as SourceType[]).map(source => (
+                    {(['yahoo', 'google', 'moneyControl', 'nse', 'combined'] as SourceType[]).map(source => (
                         <button 
                             key={source}
                             onClick={() => setSelectedSource(source)}
                             className={cn(
                                 "text-[8px] font-black uppercase tracking-widest px-2 py-0.5 rounded transition-all border",
-                                selectedSource === source ? "bg-blue-600 border-blue-500 text-white" : "bg-white/5 border-white/5 text-slate-500 hover:text-slate-300"
+                                selectedSource === source ? "bg-blue-600 border-blue-500 text-white shadow-lg shadow-blue-600/20" : "bg-white/5 border-white/5 text-slate-500 hover:text-slate-300"
                             )}
                         >
                             {source}
@@ -142,8 +132,8 @@ export default function SectorScope() {
                 </div>
             </div>
             <div className="flex items-center gap-4">
-                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest font-mono">REFRESH: {Math.floor(refreshTimer / 60)}m {refreshTimer % 60}s</span>
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e]" />
+                <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest font-mono italic">Vault Refresh: {Math.floor(refreshTimer / 60)}m {refreshTimer % 60}s</span>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_#22c55e] animate-pulse" />
             </div>
         </div>
       </div>
@@ -152,21 +142,26 @@ export default function SectorScope() {
         <div className="max-w-[1600px] mx-auto px-6 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-4 cursor-pointer group" onClick={() => setSelectedSector(null)}>
-              <div className="w-10 h-10 bg-blue-600/10 border border-blue-500/30 rounded-xl flex items-center justify-center shadow-lg">
-                <Boxes size={20} className="text-blue-500" />
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-900 border border-blue-500/30 rounded-xl flex items-center justify-center shadow-[0_0_40px_-5px_rgba(37,99,235,0.4)]">
+                <Boxes size={20} className="text-white animate-pulse" />
               </div>
-              <h1 className="text-xl font-black tracking-tighter uppercase italic leading-none">
-                  SECTOR<span className="text-blue-500">SCOPE</span>
-              </h1>
+              <div>
+                <h1 className="text-xl font-black tracking-tighter uppercase italic leading-none">
+                    SECTOR<span className="text-blue-500">SCOPE</span>
+                </h1>
+                <p className="text-[8px] font-black text-slate-600 tracking-[0.4em] uppercase mt-1">Ultra Pro Max v6.0</p>
+              </div>
             </div>
           </div>
           
           <div className="flex items-center gap-6">
-             <div className="relative">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={14} />
-               <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Symbol Scan..." className="bg-black/50 border border-white/10 rounded-xl pl-10 pr-6 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500/40 w-[250px] font-bold" />
+             <div className="relative group">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-blue-500" size={14} />
+               <input value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Neural Scan..." className="bg-black/50 border border-white/10 rounded-xl pl-10 pr-6 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500/40 w-[300px] font-bold shadow-inner" />
              </div>
-             <button onClick={fetchTrinityData} className="p-2 bg-blue-600 rounded-lg hover:bg-blue-500 transition-all"><RefreshCcw size={16} className={cn("text-white", loading && "animate-spin")} /></button>
+             <button onClick={fetchOmniData} className="p-2 bg-blue-600 rounded-lg hover:bg-blue-500 transition-all shadow-lg group active:scale-95">
+                <RefreshCcw size={16} className={cn("text-white", loading && "animate-spin")} />
+             </button>
           </div>
         </div>
       </header>
@@ -180,8 +175,8 @@ export default function SectorScope() {
                   key={sector.id}
                   onClick={() => setSelectedSector(sector)}
                   className={cn(
-                    "group relative overflow-hidden bg-[#0C0E14] border p-6 rounded-[24px] transition-all duration-500 hover:translate-y-[-4px] text-left flex flex-col justify-between min-h-[160px] shadow-lg",
-                    selectedSector?.id === sector.id ? "border-blue-500 ring-4 ring-blue-500/10" : "border-white/5 hover:border-white/20",
+                    "group relative overflow-hidden bg-[#0C0E14] border p-6 rounded-[24px] transition-all duration-500 hover:translate-y-[-4px] text-left flex flex-col justify-between min-h-[160px] shadow-[0_20px_50px_-10px_rgba(0,0,0,0.5)]",
+                    selectedSector?.id === sector.id ? "border-blue-500 ring-4 ring-blue-500/10" : "border-white/5 hover:border-white/20 hover:bg-[#11131C]",
                   )}
                 >
                   <div className="absolute top-4 right-4 bg-white/5 border border-white/10 px-2 py-1 rounded text-[10px] font-black text-blue-400 font-mono italic">
@@ -190,6 +185,7 @@ export default function SectorScope() {
                   <div>
                     <h3 className="font-black text-lg tracking-tighter group-hover:text-blue-400 transition-colors uppercase italic leading-none">{sector.name}</h3>
                     <div className={cn("inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest mt-2 border", sector.status === 'bullish' ? "bg-green-500/10 border-green-500/20 text-green-500" : "bg-red-500/10 border-red-500/20 text-red-500")}>
+                      <div className={cn("w-1 h-1 rounded-full", sector.status === 'bullish' ? "bg-green-500 shadow-[0_0_8px_#22c55e]" : "bg-red-500 shadow-[0_0_8px_#ef4444]")} />
                       {sector.status} TREND
                     </div>
                   </div>
@@ -220,17 +216,17 @@ export default function SectorScope() {
                     <div className="bg-white text-black px-4 py-2 rounded-xl font-black font-mono text-2xl shadow-xl">{activeSector.multiplier}</div>
                     <div className="space-y-1">
                         <p className="text-xs font-black text-blue-400 tracking-widest uppercase italic">Neural Analysis</p>
-                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.3em] uppercase">Verified Node: {selectedSource}</p>
+                        <p className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.3em] uppercase">Status: {selectedSource.toUpperCase()} NODE STABLE</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-8">
-                  <div className="flex items-center justify-between mb-8 px-6 text-[9px] font-black uppercase tracking-[0.4em] text-slate-700 border-b border-white/5 pb-6">
+                <div className="p-8 border-t border-white/5">
+                  <div className="flex items-center justify-between mb-8 px-6 text-[9px] font-black uppercase tracking-[0.4em] text-slate-700 pb-2">
                     <span>Neural Asset Code</span>
                     <div className="flex gap-24 pr-16">
-                      <span>R.Fac</span>
-                      <span>Consensus Chg%</span>
+                      <span>R.Fac Momentum</span>
+                      <span>Volatility Chg%</span>
                     </div>
                   </div>
                   <div className="space-y-3">
@@ -242,10 +238,10 @@ export default function SectorScope() {
                       >
                         <div className="flex flex-col items-start gap-1">
                           <span className="font-black text-xl group-hover:text-blue-400 transition-colors uppercase italic">{stock.symbol}</span>
-                          <span className="text-[10px] font-bold text-slate-600 font-mono tracking-tighter">₹{(stock.price || 0).toLocaleString()}</span>
+                          <span className="text-[10px] font-bold text-slate-600 font-mono tracking-tighter italic">₹{(stock.price || 0).toLocaleString()}</span>
                         </div>
                         <div className="flex items-center gap-12">
-                          <span className="text-lg font-black font-mono w-24 text-right text-blue-500 italic">{(stock.rFac || "0.00x")}</span>
+                          <span className="text-lg font-black font-mono w-24 text-right text-blue-400 italic">{(stock.rFac || "0.00x")}</span>
                           <div className="w-28 text-right">
                             <div className={cn("text-2xl font-black font-mono tracking-tighter leading-none", stock.chgPct >= 0 ? "text-green-500" : "text-red-500")}>
                               {stock.chgPct >= 0 ? "+" : ""}{stock.chgPct.toFixed(2)}%
@@ -270,11 +266,6 @@ export default function SectorScope() {
           )}
         </div>
       </main>
-
-      <style jsx global>{`
-        @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .animate-marquee { animation: marquee 40s linear infinite; }
-      `}</style>
     </div>
   );
 }
